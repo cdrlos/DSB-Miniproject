@@ -8,6 +8,7 @@ library("tidyverse")
 library("dplyr")
 ```
 
+
 ```{r reading_data, include=TRUE}
 df <- read.csv(file="1_Data/aiddata-countries-only.csv")
 df_tidy <- df%>% 
@@ -22,8 +23,8 @@ df_tidy <- df%>%
 
 
 ```
+#cite https://towardsdatascience.com/create-animated-bar-charts-using-r-31d09e5841da
 ```{r}
-
 staticplot = df_tidy %>% 
   ggplot( aes(rank, group = country_name, 
                 fill = as.factor(country_name), color = as.factor(country_name))) +
