@@ -7,22 +7,39 @@ date: "`r format(Sys.time(), '/%d/%m/%Y/')`"
 ```{r setup, include = FALSE} 
 library("tidyr")
 library("tidyverse")
+library("gganimate")
 ```
 
 Here are some thoughts regarding this mini-project. We will use the data in ``aiddata-countries-only.csv`` to figure out how much funding there has been to foreign countries since 1980. We would like how much the total funding for projects per year has changed over time.
 
 Here we will import the date and filter out any entries before 1980.
 ```{r}
-df <- read.csv("1_Data/aiddata-countries-only.csv")
-df2 <- df %>% filter(2020 > year & year >= 1980)
+donation_data <- read.csv("1_Data/aiddata-countries-only.csv") %>%
+    rename(commitment = commitment_amount_usd_constant,
+           purpose = coalesced_purpose_name,
+           p_code = coalesced_purpose_code)
+donations_since_1980 <- donation_data %>% filter(2020 > year & year >= 1980)
 ```
 
-The following plot shows the total funding each year since 1980. We will be focusing on the United States, therefore let us limit our data to it as follows
+The following plot shows the top six donors since 1980 and their total donations over the years.
 
 ```{r}
-df_usa <- df2 %>%
-    group_by(year) %>%
-    filter(donor == "United States")
+top_6_donors <-
+    filter(donations_since_1980,
+           donor %in% (donations_since_1980 %>%
+                       group_by(donor) %>%
+                       summarize(total_aid = sum(commitment)) %>%
+                       arrange(desc(total_aid)) %>%
+                       slice(1:6) %>%
+                       pull(donor)))
+
+top_6_donors %>%
+    group_by(donor,year) %>%
+    summarize(total_aid = sum(commitment)) %>%
+    ungroup() %>%
+    ggplot() +
+    geom_smooth(se=FALSE,
+                mapping = aes(x = year, y = total_aid, color = donor))
 ```
 
 The following plot shows the aid the United States has given to foreign countries since 1980.
@@ -65,5 +82,15 @@ df_usa %>%
 Why are we donating so much to Kuwait and Saudi Arabia in the 90s? Let's find out. 
 
 ```{r}
+top_6_donor_names <- df %>%
+    group_by(donor) %>%
+    summarize(total_aid = sum (commitment_amount_usd_constant)) %>%
+    arrange(desc(total_aid)) %>%
+    slice(1:6)
+
+top_6_donors <- df %>% filter(donor %in% top_10_donor_names$donor)
+```
+
+```{r} 
 
 ```
