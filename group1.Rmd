@@ -6,6 +6,8 @@ output:
 ```{r Packages, include=TRUE} 
 library("tidyverse")
 library("dplyr")
+library("gganimate")
+library('gifski')
 ```
 
 
@@ -63,6 +65,15 @@ anim = staticplot + transition_states(year, transition_length = 4, state_length 
        caption  = "GDP in Billions USD | Data Source: World Bank Data")
 animate(anim, 200, fps = 20,  width = 1200, height = 1000, end_pause = 10, start_pause = 10,
         renderer = gifski_renderer("gganim.gif"))
+```
+```{r}
+df %>% 
+  group_by(donor,recipient) %>%
+  summarize(sum=sum(commitment_amount_usd_constant)) %>% 
+  arrange(descsum)
+  
+
+    
 ```
 
 
