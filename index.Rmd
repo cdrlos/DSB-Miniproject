@@ -23,8 +23,7 @@ First we need to import the data and filter it appropriately. The variable `dona
 aid_data <- read_csv("1_Data/aiddata-countries-only.csv") %>%
     rename(amount = commitment_amount_usd_constant,
            purpose = coalesced_purpose_name,
-           p_code = coalesced_purpose_code) %>%
-    mutate(amount = amount/1e9)
+           p_code = coalesced_purpose_code)
 
 aid_since_1980 <- aid_data %>% filter(year >= 1980)
 
@@ -77,6 +76,7 @@ aid_donors <- aid_data %>%
     summarize(total = sum(amount)) %>%
     mutate(rank = rank(-total)) %>%
     filter(rank <= 5) %>%
+    mutate(total_lbl = round(total/1e6,2)) %>%
     ungroup()
 
 staticplot <- aid_donors %>%
@@ -92,16 +92,36 @@ staticplot <- aid_donors %>%
                   label = paste(donor, " ")),
               vjust = 0.2,
               hjust = 1) +
-    geom_text(aes(y = total, label = total, hjust = 0)) +
+    geom_text(aes(y = total, label = total_lbl, hjust = 0)) +
     coord_flip(clip = "off", expand = FALSE) +
     scale_y_continuous(labels = scales::comma) +
     scale_x_reverse() +
-    guides(color = FALSE, fill = FALSE)
+    guides(color = FALSE, fill = FALSE) +
+    theme(axis.line=element_blank(),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks=element_blank(),
+          axis.title.x=element_blank(),
+          axis.title.y=element_blank(),
+          legend.position="none",
+          panel.background=element_blank(),
+          panel.border=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank(),
+          panel.grid.major.x = element_line( size=.1, color="grey" ),
+          panel.grid.minor.x = element_line( size=.1, color="grey" ),
+          plot.title=element_text(size=25, hjust=0.5, face="bold", colour="grey", vjust=-1),
+          plot.subtitle=element_text(size=18, hjust=0.5, face="italic", color="grey"),
+          plot.caption =element_text(size=8, hjust=0.5, face="italic", color="grey"),
+          plot.background=element_blank(),
+          plot.margin = margin(2,2, 2, 4, "cm"))
 
 anim <- staticplot +
     transition_states(year, transition_length = 4, state_length = 1) +
     view_follow(fixed_x = TRUE) +
-    labs()
-animate(anim, 200, fps = 10, renderer = gifski_renderer("animation.gif"))
+    labs(title = 'GDP per Year : {closest_state}',  
+         subtitle  =  "Top 10 Countries",
+         caption  = "GDP in Billions USD | Data Source: World Bank Data")
+
+animate(anim, 200, fps = 7, renderer = gifski_renderer("animation.gif"))
 ```
-![animation](animation.gif)
