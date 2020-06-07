@@ -119,9 +119,10 @@ staticplot <- aid_donors %>%
 anim <- staticplot +
     transition_states(year, transition_length = 4, state_length = 1) +
     view_follow(fixed_x = TRUE) +
-    labs(title = 'GDP per Year : {closest_state}',  
-         subtitle  =  "Top 10 Countries",
-         caption  = "GDP in Billions USD | Data Source: World Bank Data")
+    labs(title = 'Foreign aid per year : {closest_state}',  
+         subtitle  =  "Top 5 Countries",
+         caption  = "Aid in millions USD | Data Source: AidData")
 
 animate(anim, 200, fps = 7, renderer = gifski_renderer("animation.gif"))
 ```
+#cite https://towardsdatascience.com/create-animated-bar-charts-using-r-31d09e5841da
