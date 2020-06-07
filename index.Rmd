@@ -2,7 +2,8 @@
 title: "US foreign aid since 1980"
 author: "Samal Abdikerimova, Ravi Donepudi, Carlos Salinas, and Xiran Yu"
 date: ""
-output: html_document
+output:
+  html_document
 ---
 
 ```{r setup, include = FALSE}
