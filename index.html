@@ -204,13 +204,10 @@ us_aid &lt;- aid_since_1980 %&gt;% filter(donor == &quot;United States&quot;)</c
     group_by(year) %&gt;%
     summarize(total_aid = sum(amount)) %&gt;%
     ggplot() +
-    geom_line(se = FALSE,
-              mapping = aes(x = year, y = total_aid),
+    geom_line(mapping = aes(x = year, y = total_aid),
               color = &quot;red2&quot;) +
     labs(&quot;Total aid commited by the US to foreign countries since 1980 in USD&quot;) +
-    ylab(&quot;total aid in billions of USD&quot;)</code></pre>
-<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
-<pre><code>## Warning: Ignoring unknown parameters: se</code></pre>
+    ylab(&quot;total aid in USD&quot;)</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
 <p>Interesting. So foreign aid from the US has gone down markedly since the late 1990s. Next let us take a look at the top 10 recipients of foreign aid from the US in the last 40 years. First we will rank them by total amount of US aid received since 1980.</p>
 <pre class="r"><code>names &lt;-
@@ -219,75 +216,67 @@ us_aid &lt;- aid_since_1980 %&gt;% filter(donor == &quot;United States&quot;)</c
     summarize(total_us_aid = sum(amount)) %&gt;%
     arrange(desc(total_us_aid)) %&gt;%
     ungroup() %&gt;%
-    slice(1:5) %&gt;%
+    slice(1:6) %&gt;%
     pull(recipient)
 
-top_5_recipients &lt;- us_aid %&gt;% filter(recipient %in% names)
+top_6_recipients &lt;- us_aid %&gt;% filter(recipient %in% names)
 
-top_5_recipients %&gt;%
+plot_recipients &lt;-
+    top_6_recipients %&gt;%
     group_by(recipient,year) %&gt;%
     summarize(total_aid = sum(amount)) %&gt;%
     ungroup() %&gt;%
     ggplot() +
-    geom_line(se = FALSE,
-              mapping = aes(x = year, y = total_aid, color = recipient)) +
+    geom_line(mapping = aes(x = year, y = total_aid, color = recipient)) +
     labs(title = &quot;Top 10 US aid recipients since 1980&quot;) +
-    ylab(&quot;total aid in billions of USD&quot;)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
-<p>Now let’s take a closer look at these countries and, specifically what US aid was used for. Let us take a look at how the US compares to other countries</p>
-<!-- ```{r, message = FALSE, warning = FALSE} -->
-<!-- aid_donors <- aid_data %>% -->
-<!--     group_by(year,donor) %>% -->
-<!--     summarize(total = sum(amount)) %>% -->
-<!--     mutate(rank = rank(-total)) %>% -->
-<!--     filter(rank <= 5) %>% -->
-<!--     mutate(total_lbl = round(total/1e6,2)) %>% -->
-<!--     ungroup() -->
-<!-- staticplot <- aid_donors %>% -->
-<!--     ggplot(aes(rank, -->
-<!--                group = donor, -->
-<!--                fill = as.factor(donor))) + -->
-<!--     geom_tile(aes(y = total/2, -->
-<!--                   height = total, -->
-<!--                   width = 0.9), -->
-<!--               alpha = 0.8, -->
-<!--               color = NA) + -->
-<!--     geom_text(aes(y = 0, -->
-<!--                   label = paste(donor, " ")), -->
-<!--               vjust = 0.2, -->
-<!--               hjust = 1) + -->
-<!--     geom_text(aes(y = total, label = total_lbl, hjust = 0)) + -->
-<!--     coord_flip(clip = "off", expand = FALSE) + -->
-<!--     scale_y_continuous(labels = scales::comma) + -->
-<!--     scale_x_reverse() + -->
-<!--     guides(color = FALSE, fill = FALSE) + -->
-<!--     theme(axis.line=element_blank(), -->
-<!--           axis.text.x=element_blank(), -->
-<!--           axis.text.y=element_blank(), -->
-<!--           axis.ticks=element_blank(), -->
-<!--           axis.title.x=element_blank(), -->
-<!--           axis.title.y=element_blank(), -->
-<!--           legend.position="none", -->
-<!--           panel.background=element_blank(), -->
-<!--           panel.border=element_blank(), -->
-<!--           panel.grid.major=element_blank(), -->
-<!--           panel.grid.minor=element_blank(), -->
-<!--           panel.grid.major.x = element_line( size=.1, color="grey" ), -->
-<!--           panel.grid.minor.x = element_line( size=.1, color="grey" ), -->
-<!--           plot.title=element_text(size=25, hjust=0.5, face="bold", colour="grey", vjust=-1), -->
-<!--           plot.subtitle=element_text(size=18, hjust=0.5, face="italic", color="grey"), -->
-<!--           plot.caption =element_text(size=8, hjust=0.5, face="italic", color="grey"), -->
-<!--           plot.background=element_blank(), -->
-<!--           plot.margin = margin(2,2, 2, 4, "cm")) -->
-<!-- anim <- staticplot + -->
-<!--     transition_states(year, transition_length = 4, state_length = 1) + -->
-<!--     view_follow(fixed_x = TRUE) + -->
-<!--     labs(title = 'Foreign aid per year : {closest_state}',   -->
-<!--          subtitle  =  "Top 5 Countries", -->
-<!--          caption  = "Aid in millions USD | Data Source: AidData") -->
-<!-- animate(anim, 200, fps = 5, end_pause = 5, renderer = gifski_renderer("animation.gif")) -->
-<!-- ``` -->
-<!-- #cite https://towardsdatascience.com/create-animated-bar-charts-using-r-31d09e5841da -->
+    ylab(&quot;total aid in of USD&quot;)</code></pre>
+<p>Next we take a look at what sort of thing they were being funded for.</p>
+<pre class="r"><code>top_6_recipients$purpose &lt;-
+    top_6_recipients %&gt;%
+    pull(purpose) %&gt;%
+    factor(levels = c(sort(unique(top_6_recipients$purpose))))</code></pre>
+<p>Here is what the aid in the top 5 foreign countries is being used for.</p>
+<pre class="r"><code>top_6_recipients %&gt;%
+    mutate(amount = amount/1e9) %&gt;%
+    group_by(recipient,purpose) %&gt;%
+    summarize(rank = sum(amount)) %&gt;%
+    arrange(desc(rank)) %&gt;%
+    slice(1:5) %&gt;%
+    ungroup() %&gt;%
+    ggplot() +
+    geom_bar(aes(x = purpose, y = rank, fill = purpose, color = purpose),
+             stat = &quot;identity&quot;,
+             position = &quot;dodge&quot;) +
+    facet_grid(. ~purpose, scales = &quot;free_x&quot;, space = &quot;free_x&quot;) +
+    facet_wrap(~recipient, scales = &quot;free_x&quot;) +
+    labs(&quot;US aid usage since 1980&quot;) +
+    ylab(&quot;Aid in billions of USD&quot;) +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>(This is not a daltonic friendly graphic.)</p>
+<p>Most donated to purposes.</p>
+<pre class="r"><code>us_aid %&gt;%
+    group_by(year) %&gt;%
+    mutate(amount = amount/1e9, rank = rank(-amount)) %&gt;%
+    filter(rank &lt;= 5) %&gt;%
+    ungroup() %&gt;%
+    ggplot(aes(rank,
+               group = purpose,
+               fill = purpose,
+               color =purpose)) +
+    geom_tile(aes(y = amount/2, height = amount, width = 0.9),
+              alpha = 0.8) +
+    ylab(&quot;Amound in billions of USD&quot;) +
+    xlab(&quot;Top 5 purposes&quot;) +
+    transition_states(year,
+                      transition_length = 2,
+                      state_length = 1) +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())</code></pre>
+<p><img src="index_files/figure-html/aid-purpose-per-year-since-1980-1.gif" /><!-- --></p>
 
 
 

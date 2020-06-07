@@ -6,6 +6,9 @@ output:
   html_document
 ---
 
+[tds-1]: https://towardsdatascience.com/create-animated-bar-charts-using-r-31d09e5841da
+
+
 ```{r setup, include = FALSE}
 library("tidyr")
 library("tidyverse")
@@ -40,7 +43,7 @@ us_aid %>%
     geom_line(mapping = aes(x = year, y = total_aid),
               color = "red2") +
     labs("Total aid commited by the US to foreign countries since 1980 in USD") +
-    ylab("total aid in billions of USD")
+    ylab("total aid in USD")
 ```
 
 Interesting. So foreign aid from the US has gone down markedly since the late 1990s. Next let us take a look at the top 10 recipients of foreign aid from the US in the last 40 years. First we will rank them by total amount of US aid received since 1980.
@@ -52,77 +55,75 @@ names <-
     summarize(total_us_aid = sum(amount)) %>%
     arrange(desc(total_us_aid)) %>%
     ungroup() %>%
-    slice(1:5) %>%
+    slice(1:6) %>%
     pull(recipient)
 
-top_5_recipients <- us_aid %>% filter(recipient %in% names)
+top_6_recipients <- us_aid %>% filter(recipient %in% names)
 
-top_5_recipients %>%
+plot_recipients <-
+    top_6_recipients %>%
     group_by(recipient,year) %>%
     summarize(total_aid = sum(amount)) %>%
     ungroup() %>%
     ggplot() +
-    geom_line(se = FALSE,
-              mapping = aes(x = year, y = total_aid, color = recipient)) +
+    geom_line(mapping = aes(x = year, y = total_aid, color = recipient)) +
     labs(title = "Top 10 US aid recipients since 1980") +
-    ylab("total aid in billions of USD")
+    ylab("total aid in of USD")
 ```
 
-Now let's take a closer look at these countries and, specifically what US aid was used for. Let us take a look at how the US compares to other countries 
+Next we take a look at what sort of thing they were being funded for.
 
 ```{r, message = FALSE, warning = FALSE}
-aid_donors <- aid_data %>%
-    group_by(year,donor) %>%
-    summarize(total = sum(amount)) %>%
-    mutate(rank = rank(-total)) %>%
-    filter(rank <= 5) %>%
-    mutate(total_lbl = round(total/1e6,2)) %>%
-    ungroup()
-
-staticplot <- aid_donors %>%
-    ggplot(aes(rank,
-               group = donor,
-               fill = as.factor(donor))) +
-    geom_tile(aes(y = total/2,
-                  height = total,
-                  width = 0.9),
-              alpha = 0.8,
-              color = NA) +
-    geom_text(aes(y = 0,
-                  label = paste(donor, " ")),
-              vjust = 0.2,
-              hjust = 1) +
-    geom_text(aes(y = total, label = total_lbl, hjust = 0)) +
-    coord_flip(clip = "off", expand = FALSE) +
-    scale_y_continuous(labels = scales::comma) +
-    scale_x_reverse() +
-    guides(color = FALSE, fill = FALSE) +
-    theme(axis.line=element_blank(),
-          axis.text.x=element_blank(),
-          axis.text.y=element_blank(),
-          axis.ticks=element_blank(),
-          axis.title.x=element_blank(),
-          axis.title.y=element_blank(),
-          legend.position="none",
-          panel.background=element_blank(),
-          panel.border=element_blank(),
-          panel.grid.major=element_blank(),
-          panel.grid.minor=element_blank(),
-          panel.grid.major.x = element_line( size=.1, color="grey" ),
-          panel.grid.minor.x = element_line( size=.1, color="grey" ),
-          plot.title=element_text(size=25, hjust=0.5, face="bold", colour="grey", vjust=-1),
-          plot.subtitle=element_text(size=18, hjust=0.5, face="italic", color="grey"),
-          plot.caption =element_text(size=8, hjust=0.5, face="italic", color="grey"),
-          plot.background=element_blank(),
-          plot.margin = margin(2,2, 2, 4, "cm"))
-
-anim <- staticplot +
-    transition_states(year, transition_length = 4, state_length = 1) +
-    view_follow(fixed_x = TRUE) +
-    labs(title = 'Foreign aid per year : {closest_state}',  
-         subtitle  =  "Top 5 Countries",
-         caption  = "Aid in millions USD | Data Source: AidData")
-
-animate(anim, 200, fps = 5, end_pause = 5, renderer = gifski_renderer("animation.gif"))
+top_6_recipients$purpose <-
+    top_6_recipients %>%
+    pull(purpose) %>%
+    factor(levels = c(sort(unique(top_6_recipients$purpose))))
 ```
-#cite https://towardsdatascience.com/create-animated-bar-charts-using-r-31d09e5841da
+
+Here is what the aid in the top 5 foreign countries is being used for. 
+```{r, message = FALSE, warning = FALSE}
+top_6_recipients %>%
+    mutate(amount = amount/1e9) %>%
+    group_by(recipient,purpose) %>%
+    summarize(rank = sum(amount)) %>%
+    arrange(desc(rank)) %>%
+    slice(1:5) %>%
+    ungroup() %>%
+    ggplot() +
+    geom_bar(aes(x = purpose, y = rank, fill = purpose, color = purpose),
+             stat = "identity",
+             position = "dodge") +
+    facet_grid(. ~purpose, scales = "free_x", space = "free_x") +
+    facet_wrap(~recipient, scales = "free_x") +
+    labs("US aid usage since 1980") +
+    ylab("Aid in billions of USD") +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())
+```
+
+(This is not a daltonic friendly graphic.)
+
+[] # To make the axis look better I sometimes scale the amount by billions
+Most donated to purposes.
+```{r aid-purpose-per-year-since-1980, message = FALSE, warning = FALSE}
+us_aid %>%
+    group_by(year) %>%
+    mutate(amount = amount/1e9, rank = rank(-amount)) %>%
+    filter(rank <= 5) %>%
+    ungroup() %>%
+    ggplot(aes(rank,
+               group = purpose,
+               fill = purpose,
+               color =purpose)) +
+    geom_tile(aes(y = amount/2, height = amount, width = 0.9),
+              alpha = 0.8) +
+    ylab("Amound in billions of USD") +
+    xlab("Top 5 purposes") +
+    transition_states(year,
+                      transition_length = 2,
+                      state_length = 1) +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())
+```
