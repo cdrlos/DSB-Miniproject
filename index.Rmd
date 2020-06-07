@@ -123,6 +123,6 @@ anim <- staticplot +
          subtitle  =  "Top 5 Countries",
          caption  = "Aid in millions USD | Data Source: AidData")
 
-animate(anim, 200, fps = 7, renderer = gifski_renderer("animation.gif"))
+animate(anim, 200, fps = 7, end_pase = 10, renderer = gifski_renderer("animation.gif"))
 ```
 #cite https://towardsdatascience.com/create-animated-bar-charts-using-r-31d09e5841da
