@@ -22,7 +22,7 @@
 <script src="index_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="index_files/bootstrap-3.3.5/shim/respond.min.js"></script>
 <script src="index_files/navigation-1.1/tabsets.js"></script>
-<link href="index_files/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<link href="index_files/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="index_files/highlightjs-9.12.0/highlight.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -235,60 +235,59 @@ top_5_recipients %&gt;%
     ylab(&quot;total aid in billions of USD&quot;)</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>Now let’s take a closer look at these countries and, specifically what US aid was used for. Let us take a look at how the US compares to other countries</p>
-<pre class="r"><code>aid_donors &lt;- aid_data %&gt;%
-    group_by(year,donor) %&gt;%
-    summarize(total = sum(amount)) %&gt;%
-    mutate(rank = rank(-total)) %&gt;%
-    filter(rank &lt;= 5) %&gt;%
-    mutate(total_lbl = round(total/1e6,2)) %&gt;%
-    ungroup()
-
-staticplot &lt;- aid_donors %&gt;%
-    ggplot(aes(rank,
-               group = donor,
-               fill = as.factor(donor))) +
-    geom_tile(aes(y = total/2,
-                  height = total,
-                  width = 0.9),
-              alpha = 0.8,
-              color = NA) +
-    geom_text(aes(y = 0,
-                  label = paste(donor, &quot; &quot;)),
-              vjust = 0.2,
-              hjust = 1) +
-    geom_text(aes(y = total, label = total_lbl, hjust = 0)) +
-    coord_flip(clip = &quot;off&quot;, expand = FALSE) +
-    scale_y_continuous(labels = scales::comma) +
-    scale_x_reverse() +
-    guides(color = FALSE, fill = FALSE) +
-    theme(axis.line=element_blank(),
-          axis.text.x=element_blank(),
-          axis.text.y=element_blank(),
-          axis.ticks=element_blank(),
-          axis.title.x=element_blank(),
-          axis.title.y=element_blank(),
-          legend.position=&quot;none&quot;,
-          panel.background=element_blank(),
-          panel.border=element_blank(),
-          panel.grid.major=element_blank(),
-          panel.grid.minor=element_blank(),
-          panel.grid.major.x = element_line( size=.1, color=&quot;grey&quot; ),
-          panel.grid.minor.x = element_line( size=.1, color=&quot;grey&quot; ),
-          plot.title=element_text(size=25, hjust=0.5, face=&quot;bold&quot;, colour=&quot;grey&quot;, vjust=-1),
-          plot.subtitle=element_text(size=18, hjust=0.5, face=&quot;italic&quot;, color=&quot;grey&quot;),
-          plot.caption =element_text(size=8, hjust=0.5, face=&quot;italic&quot;, color=&quot;grey&quot;),
-          plot.background=element_blank(),
-          plot.margin = margin(2,2, 2, 4, &quot;cm&quot;))
-
-anim &lt;- staticplot +
-    transition_states(year, transition_length = 4, state_length = 1) +
-    view_follow(fixed_x = TRUE) +
-    labs(title = &#39;Foreign aid per year : {closest_state}&#39;,  
-         subtitle  =  &quot;Top 5 Countries&quot;,
-         caption  = &quot;Aid in millions USD | Data Source: AidData&quot;)
-
-animate(anim, 200, fps = 7, end_pause = 10, renderer = gifski_renderer(&quot;animation.gif&quot;))</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-3-1.gif" /><!-- --> #cite <a href="https://towardsdatascience.com/create-animated-bar-charts-using-r-31d09e5841da" class="uri">https://towardsdatascience.com/create-animated-bar-charts-using-r-31d09e5841da</a></p>
+<!-- ```{r, message = FALSE, warning = FALSE} -->
+<!-- aid_donors <- aid_data %>% -->
+<!--     group_by(year,donor) %>% -->
+<!--     summarize(total = sum(amount)) %>% -->
+<!--     mutate(rank = rank(-total)) %>% -->
+<!--     filter(rank <= 5) %>% -->
+<!--     mutate(total_lbl = round(total/1e6,2)) %>% -->
+<!--     ungroup() -->
+<!-- staticplot <- aid_donors %>% -->
+<!--     ggplot(aes(rank, -->
+<!--                group = donor, -->
+<!--                fill = as.factor(donor))) + -->
+<!--     geom_tile(aes(y = total/2, -->
+<!--                   height = total, -->
+<!--                   width = 0.9), -->
+<!--               alpha = 0.8, -->
+<!--               color = NA) + -->
+<!--     geom_text(aes(y = 0, -->
+<!--                   label = paste(donor, " ")), -->
+<!--               vjust = 0.2, -->
+<!--               hjust = 1) + -->
+<!--     geom_text(aes(y = total, label = total_lbl, hjust = 0)) + -->
+<!--     coord_flip(clip = "off", expand = FALSE) + -->
+<!--     scale_y_continuous(labels = scales::comma) + -->
+<!--     scale_x_reverse() + -->
+<!--     guides(color = FALSE, fill = FALSE) + -->
+<!--     theme(axis.line=element_blank(), -->
+<!--           axis.text.x=element_blank(), -->
+<!--           axis.text.y=element_blank(), -->
+<!--           axis.ticks=element_blank(), -->
+<!--           axis.title.x=element_blank(), -->
+<!--           axis.title.y=element_blank(), -->
+<!--           legend.position="none", -->
+<!--           panel.background=element_blank(), -->
+<!--           panel.border=element_blank(), -->
+<!--           panel.grid.major=element_blank(), -->
+<!--           panel.grid.minor=element_blank(), -->
+<!--           panel.grid.major.x = element_line( size=.1, color="grey" ), -->
+<!--           panel.grid.minor.x = element_line( size=.1, color="grey" ), -->
+<!--           plot.title=element_text(size=25, hjust=0.5, face="bold", colour="grey", vjust=-1), -->
+<!--           plot.subtitle=element_text(size=18, hjust=0.5, face="italic", color="grey"), -->
+<!--           plot.caption =element_text(size=8, hjust=0.5, face="italic", color="grey"), -->
+<!--           plot.background=element_blank(), -->
+<!--           plot.margin = margin(2,2, 2, 4, "cm")) -->
+<!-- anim <- staticplot + -->
+<!--     transition_states(year, transition_length = 4, state_length = 1) + -->
+<!--     view_follow(fixed_x = TRUE) + -->
+<!--     labs(title = 'Foreign aid per year : {closest_state}',   -->
+<!--          subtitle  =  "Top 5 Countries", -->
+<!--          caption  = "Aid in millions USD | Data Source: AidData") -->
+<!-- animate(anim, 200, fps = 5, end_pause = 5, renderer = gifski_renderer("animation.gif")) -->
+<!-- ``` -->
+<!-- #cite https://towardsdatascience.com/create-animated-bar-charts-using-r-31d09e5841da -->
 
 
 

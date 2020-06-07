@@ -1,4 +1,4 @@
 html_document:
   self_contained: false
   theme: cerulean
-  highlight: textmate
+  highlight: default

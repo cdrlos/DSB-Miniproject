@@ -32,13 +32,12 @@ us_aid <- aid_since_1980 %>% filter(donor == "United States")
 ```
 Now, let us look at the total foreign aid provided by the US (adjusted for inflation) within this 40 year period. The following code tries to fit a smooth curve to the data.
 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 us_aid %>%
     group_by(year) %>%
     summarize(total_aid = sum(amount)) %>%
     ggplot() +
-    geom_line(se = FALSE,
-              mapping = aes(x = year, y = total_aid),
+    geom_line(mapping = aes(x = year, y = total_aid),
               color = "red2") +
     labs("Total aid commited by the US to foreign countries since 1980 in USD") +
     ylab("total aid in billions of USD")
@@ -124,6 +123,6 @@ anim <- staticplot +
          subtitle  =  "Top 5 Countries",
          caption  = "Aid in millions USD | Data Source: AidData")
 
-animate(anim, 200, fps = 7, end_pause = 10, renderer = gifski_renderer("animation.gif"))
+animate(anim, 200, fps = 5, end_pause = 5, renderer = gifski_renderer("animation.gif"))
 ```
 #cite https://towardsdatascience.com/create-animated-bar-charts-using-r-31d09e5841da
