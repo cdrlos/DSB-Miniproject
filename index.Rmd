@@ -1,0 +1,73 @@
+---
+title: "US foreign aid since 1980"
+author: "Samal Abdikerimova, Ravi Donepudi, Carlos Salinas, and Xiran Yu"
+date: ""
+output: html_document
+---
+
+```{r setup, include = FALSE}
+library("tidyr")
+library("tidyverse")
+library("gganimate")
+```
+
+We will be using AidData's data set [``aiddata-countries-only.csv``](1_Data/aiddata-countries-only.csv) to give an answer to some of the following questions
+
+1. Which countries have seen the most US aid in the last 40 years?
+2. What were the intended purposes of the aid?
+3. How has the intended purpose changed over the years?
+
+First we need to import the data and filter it appropriately. The variable `donations_since_1980` holds donations committed by countries all countries since 1980, and of those `donations_usa` holds donations committed by the USA. (Note that we rename some of the accessors for ease of use.)
+
+```{r import data, message = FALSE, warning = FALSE}
+aid_data <- read_csv("1_Data/aiddata-countries-only.csv") %>%
+    rename(amount = commitment_amount_usd_constant,
+           purpose = coalesced_purpose_name,
+           p_code = coalesced_purpose_code)
+aid_since_1980 <- aid_data %>% filter(year >= 1980)
+us_aid <- aid_since_1980 %>% filter(donor == "United States")
+```
+Now, let us look at the total foreign aid provided by the US (adjusted for inflation) within this 40 year period. The following code tries to fit a smooth curve to the data.
+
+```{r}
+us_aid %>%
+    group_by(year) %>%
+    summarize(total_aid = sum(amount)) %>%
+    ggplot() +
+    geom_line(se = FALSE,
+              mapping = aes(x = year, y = total_aid),
+              color = "red2") +
+    labs("Total aid commited by the US to foreign countries since 1980 in USD") +
+    xlab("total aid")
+```
+
+Interesting. So foreign aid from the US has gone down markedly since the late 1990s. Next let us take a look at the top 10 recipients of foreign aid from the US in the last 40 years. First we will rank them by total amount of US aid received since 1980.
+
+```{r, message = FALSE, warning = FALSE}
+names <-
+    us_aid %>%
+    group_by(recipient) %>%
+    summarize(total_us_aid = sum(amount)) %>%
+    arrange(desc(total_us_aid)) %>%
+    ungroup() %>%
+    slice(1:5) %>%
+    pull(recipient)
+
+top_5_recipients <- us_aid %>% filter(recipient %in% names)
+
+top_5_recipients %>%
+    group_by(recipient,year) %>%
+    summarize(total_aid = sum(amount)) %>%
+    ungroup() %>%
+    ggplot() +
+    geom_line(se = FALSE,
+              mapping = aes(x = year, y = total_aid, color = recipient)) +
+    labs(title = "Top 10 US aid recipients since 1980") +
+    ylab("total aid")
+```
+
+Now let's take a closer look at these countries and, specifically what US aid was used for.
+
+```{r}
+top_5_purpose <- 
+```

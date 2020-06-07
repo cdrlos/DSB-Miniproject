@@ -45,8 +45,10 @@ top_6_donors %>%
 
 Next we look what purpose these countries donated the most to
 ```{r}
-group_by(donor,purpose) %>%
+top_6_donors %>%
+    group_by(donor,purpose) %>%
     summarize(total_p = sum(commitment)) %>%
+    arrange(desc(total_p)) %>%
     ungroup()
 ```
 
