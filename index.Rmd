@@ -98,7 +98,7 @@ staticplot <- aid_donors %>%
     scale_x_reverse() +
     guides(color = FALSE, fill = FALSE)
 
-animation <- staticplot +
+anim <- staticplot +
     transition_states(year, transition_length = 4, state_length = 1) +
     view_follow(fixed_x = TRUE) +
     labs()
