@@ -104,3 +104,4 @@ animation <- staticplot +
     labs()
 animate(anim, 200, fps = 10, renderer = gifski_renderer("animation.gif"))
 ```
+![animation](animation.gif)
