@@ -4,21 +4,22 @@ author: Samal Abdikerimova, Ravi Donepudi, Carlos Salinas, and Xiran Yu
 date: "`r format(Sys.time(), '/%d/%m/%Y/')`"
 ---
 
-```{r setup, include = FALSE} 
+```{r setup, include = FALSE}
 library("tidyr")
 library("tidyverse")
 library("gganimate")
 ```
 
-Here are some thoughts regarding this mini-project. We will use the data in ``aiddata-countries-only.csv`` to figure out how much funding there has been to foreign countries since 1980. We would like how much the total funding for projects per year has changed over time.
+We will analyze foreign aid data since 1980s and look for any relationships between GDP and the top donors and the sorts of purposes/projects they are most willing to donate to.
 
-Here we will import the date and filter out any entries before 1980.
+
+First we import the data and filter out any donation made prior to 1980. We do this as follows
 ```{r}
-donation_data <- read.csv("1_Data/aiddata-countries-only.csv") %>%
+donation_data <- read_csv("1_Data/aiddata-countries-only.csv") %>%
     rename(commitment = commitment_amount_usd_constant,
            purpose = coalesced_purpose_name,
            p_code = coalesced_purpose_code)
-donations_since_1980 <- donation_data %>% filter(2020 > year & year >= 1980)
+donations_since_1980 <- donation_data %>% filter(year >= 1980)
 ```
 
 The following plot shows the top six donors since 1980 and their total donations over the years.
@@ -40,6 +41,13 @@ top_6_donors %>%
     ggplot() +
     geom_smooth(se=FALSE,
                 mapping = aes(x = year, y = total_aid, color = donor))
+```
+
+Next we look what purpose these countries donated the most to
+```{r}
+group_by(donor,purpose) %>%
+    summarize(total_p = sum(commitment)) %>%
+    ungroup()
 ```
 
 The following plot shows the aid the United States has given to foreign countries since 1980.
@@ -79,7 +87,7 @@ df_usa %>%
          y="Total aid from the US in USD")
 ```
 
-Why are we donating so much to Kuwait and Saudi Arabia in the 90s? Let's find out. 
+Why are we donating so much to Kuwait and Saudi Arabia in the 90s? Let's find out.
 
 ```{r}
 top_6_donor_names <- df %>%
@@ -91,6 +99,6 @@ top_6_donor_names <- df %>%
 top_6_donors <- df %>% filter(donor %in% top_10_donor_names$donor)
 ```
 
-```{r} 
+```{r}
 
 ```
