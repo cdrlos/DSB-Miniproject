@@ -127,3 +127,25 @@ us_aid %>%
           axis.text.x=element_blank(),
           axis.ticks.x=element_blank())
 ```
+
+```{r}
+us_aid %>%
+  filter(recipient == "Brazil") %>%
+  group_by(purpose, year) %>% 
+  summarize(rank = sum(amount)) %>%
+    arrange(desc(rank)) %>%
+    ungroup() %>%
+    ggplot() +
+    geom_bar(aes(x = purpose, y = rank, fill = purpose, color = purpose),
+             stat = "identity",
+             position = "dodge") +
+    labs("US aid usage since 1980") +
+    ylab("Aid in billions of USD") +
+    transition_states(year,
+                      transition_length = 2,
+                      state_length = 1) +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())
+```
+
