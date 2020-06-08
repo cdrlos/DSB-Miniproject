@@ -80,7 +80,7 @@ top_6_recipients$purpose <-
     factor(levels = c(sort(unique(top_6_recipients$purpose))))
 ```
 
-Here is what the aid in the top 5 foreign countries is being used for. 
+Here is what the aid in the top 5 foreign countries is being used for.
 ```{r, message = FALSE, warning = FALSE}
 top_6_recipients %>%
     mutate(amount = amount/1e9) %>%
@@ -125,7 +125,8 @@ us_aid %>%
                       state_length = 1) +
     theme(axis.title.x=element_blank(),
           axis.text.x=element_blank(),
-          axis.ticks.x=element_blank())
+          axis.ticks.x=element_blank()) %>%
+    animate(width = 400, height = 600, res = 35)
 ```
 
 ```{r}
