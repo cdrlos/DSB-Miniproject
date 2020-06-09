@@ -1,9 +1,14 @@
 ---
 title: "US foreign aid since 1980"
 author: "Samal Abdikerimova, Ravi Donepudi, Carlos Salinas, and Xiran Yu"
-date: ""
+date: "today"
 output:
-  html_document
+  html_document:
+    toc: yes
+    toc_depth: 2
+    theme: united
+    highlight: default
+    self_contained: yes
 ---
 
 [tds-1]: https://towardsdatascience.com/create-animated-bar-charts-using-r-31d09e5841da
@@ -15,6 +20,8 @@ library("tidyverse")
 library("gganimate")
 ```
 
+# What is US aid being used for
+
 We will be using AidData's data set [``aiddata-countries-only.csv``](1_Data/aiddata-countries-only.csv) to give an answer to some of the following questions
 
 1. Which countries have seen the most US aid in the last 40 years?
@@ -23,7 +30,7 @@ We will be using AidData's data set [``aiddata-countries-only.csv``](1_Data/aidd
 
 First we need to import the data and filter it appropriately. The variable `donations_since_1980` holds donations committed by countries all countries since 1980, and of those `donations_usa` holds donations committed by the USA. (Note that we rename some of the accessors for ease of use.)
 
-```{r import data, message = FALSE, warning = FALSE}
+```{r import data, message = FALSE, warning = FALSE, echo = FALSE}
 aid_data <- read_csv("1_Data/aiddata-countries-only.csv") %>%
     rename(amount = commitment_amount_usd_constant,
            purpose = coalesced_purpose_name,
@@ -81,7 +88,7 @@ top_6_recipients$purpose <-
 ```
 
 Here is what the aid in the top 5 foreign countries is being used for.
-```{r, message = FALSE, warning = FALSE}
+```{r, message = FALSE, warning = FALSE, echo = FALSE}
 top_6_recipients %>%
     mutate(amount = amount/1e9) %>%
     group_by(recipient,purpose) %>%
@@ -103,50 +110,3 @@ top_6_recipients %>%
 ```
 
 (This is not a daltonic friendly graphic.)
-
-[] # To make the axis look better I sometimes scale the amount by billions
-Most donated to purposes.
-```{r aid-purpose-per-year-since-1980, message = FALSE, warning = FALSE}
-us_aid %>%
-    group_by(year) %>%
-    mutate(amount = amount/1e9, rank = rank(-amount)) %>%
-    filter(rank <= 5) %>%
-    ungroup() %>%
-    ggplot(aes(rank,
-               group = purpose,
-               fill = purpose,
-               color =purpose)) +
-    geom_tile(aes(y = amount/2, height = amount, width = 0.9),
-              alpha = 0.8) +
-    ylab("Amound in billions of USD") +
-    xlab("Top 5 purposes") +
-    transition_states(year,
-                      transition_length = 2,
-                      state_length = 1) +
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank()) %>%
-    animate(width = 400, height = 600, res = 35)
-```
-
-```{r}
-us_aid %>%
-  filter(recipient == "Brazil") %>%
-  group_by(purpose, year) %>% 
-  summarize(rank = sum(amount)) %>%
-    arrange(desc(rank)) %>%
-    ungroup() %>%
-    ggplot() +
-    geom_bar(aes(x = purpose, y = rank, fill = purpose, color = purpose),
-             stat = "identity",
-             position = "dodge") +
-    labs("US aid usage since 1980") +
-    ylab("Aid in billions of USD") +
-    transition_states(year,
-                      transition_length = 2,
-                      state_length = 1) +
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank())
-```
-

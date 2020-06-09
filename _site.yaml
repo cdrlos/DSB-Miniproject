@@ -1,0 +1,15 @@
+name: "DSB 2020 Team 1"
+
+navbar:
+  title: "Aid data"
+  left:
+    - text: "Aid data"
+      href: index.html
+
+html_document:
+    toc: yes
+    toc_float: yes
+    toc_depth: 2
+    theme: cosmo
+    highlight: texmate
+    self_contained: no
